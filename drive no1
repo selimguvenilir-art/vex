@@ -1,0 +1,143 @@
+/*----------------------------------------------------------------------------*/
+/*                                                                            */
+/*    Module:       main.cpp                                                  */
+/*    Author:       Monster                                                   */
+/*    Created:      11/5/2025, 2:18:16 PM                                     */
+/*    Description:  V5 project                                                */
+/*                                                                            */
+/*----------------------------------------------------------------------------*/
+
+#include "vex.h"
+
+using namespace vex;
+
+// A global instance of competition
+controller Controller = controller();
+competition Competition;
+motor LeftmotorA=(PORT11,ratio18_1,false);
+motor LeftmotorB=(PORT20,ratio18_1,false);
+motor_group LeftMotorGroup=(LeftmotorA,LeftmotorB);
+//inertial Inertial=(PORT1);
+motor RightmotorA=(PORT4,ratio18_1,true);
+motor RightmotorB=(PORT10,ratio18_1,true);
+motor_group RightMotorGroup=(RightmotorA,RightmotorB);
+
+motor palet1=(PORT5,ratio18_1,false);
+motor palet2=(PORT7,ratio18_1,false);
+motor intake=(PORT21,ratio18_1,true);
+motor roller=(PORT13,ratio18_1,false);
+ 
+
+// define your global instances of motors and other devices here
+
+/*---------------------------------------------------------------------------*/
+/*                          Pre-Autonomous Functions                         */
+/*                                                                           */
+/*  You may want to perform some actions before the competition starts.      */
+/*  Do them in the following function.  You must return from this function   */
+/*  or the autonomous and usercontrol tasks will not be started.  This       */
+/*  function is only called once after the V5 has been powered on and        */
+/*  not every time that the robot is disabled.                               */
+/*---------------------------------------------------------------------------*/
+
+void pre_auton(void) {
+
+  // All activities that occur before the competition starts
+  // Example: clearing encoders, setting servo positions, ...
+}
+
+/*---------------------------------------------------------------------------*/
+/*                                                                           */
+/*                              Autonomous Task                              */
+/*                                                                           */
+/*  This task is used to control your robot during the autonomous phase of   */
+/*  a VEX Competition.                                                       */
+/*                                                                           */
+/*  You must modify the code to add your own robot specific commands here.   */
+/*---------------------------------------------------------------------------*/
+
+void autonomous(void) {
+ 
+  // ..........................................................................
+  // Insert autonomous user code here.
+ 
+  // ..........................................................................
+}
+
+/*---------------------------------------------------------------------------*/
+/*                                                                           */
+/*                              User Control Task                            */
+/*                                                                           */
+/*  This task is used to control your robot during the user control phase of */
+/*  a VEX Competition.                                                       */
+/*                                                                           */
+/*  You must modify the code to add your own robot specific commands here.   */
+/*---------------------------------------------------------------------------*/
+
+void usercontrol(void) {
+  // User control code here, inside the loop
+  while (1) {
+   
+    // This is the main execution loop for the user control program.
+    // Each time through the loop your program should update motor + servo
+    // values based on feedback from the joysticks.
+
+    // ........................................................................
+    // Insert user code here. This is where you use the joystick values to
+   
+   LeftMotorGroup.setVelocity(((Controller.Axis3.position() + Controller.Axis1.position())/254)*100,percent);
+   RightMotorGroup.setVelocity(((Controller.Axis3.position() - Controller.Axis1.position())/254)*100,percent);
+   LeftMotorGroup.spin(forward);
+   RightMotorGroup.spin(forward);
+   if(Controller.ButtonR2.pressing()){
+    palet1.setVelocity(200,rpm);
+    palet2.setVelocity(200,rpm);
+    intake.setVelocity(200,rpm);
+    palet1.spin(forward);
+    palet2.spin(forward);
+    intake.spin(forward);
+   }else if(Controller.ButtonR1.pressing()){
+    palet1.setVelocity(200,rpm);
+    palet2.setVelocity(200,rpm);
+    intake.setVelocity(200,rpm);
+    palet1.spin(reverse);
+    palet2.spin(reverse);
+    intake.spin(reverse);
+   }else{
+    palet1.stop(brake);
+    palet2.stop(brake);
+    intake.stop(brake);
+   }
+   if(Controller.ButtonL1.pressing() || Controller.ButtonR1.pressing()){
+    roller.setVelocity(200,rpm);
+    roller.spin(reverse);
+   }else if(Controller.ButtonR2.pressing()){
+    roller.setVelocity(200,rpm);
+    roller.spin(forward);
+   }else{
+    roller.stop(brake);
+   }
+
+    // update your motors, etc.
+    // ........................................................................
+
+    wait(20, msec); // Sleep the task for a short amount of time to
+                    // prevent wasted resources.
+  }
+}
+
+//
+// Main will set up the competition functions and callbacks.
+//
+int main() {
+  // Set up callbacks for autonomous and driver control periods.
+ Competition.autonomous(autonomous);
+  Competition.drivercontrol(usercontrol);
+  // Run the pre-autonomous function.
+  pre_auton();
+
+  // Prevent main from exiting with an infinite loop.
+  while (true) {
+    wait(100, msec);
+  }
+}
